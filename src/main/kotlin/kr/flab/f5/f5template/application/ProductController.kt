@@ -18,21 +18,22 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/products")
 class ProductController(
-    private val productService: ProductService
+    private val productReadUseCase: ProductReadUseCase,
+    private val productCommandUseCase: ProductCommandUseCase
 ) {
 
     @PatchMapping("/{id}/stock")
     fun decreaseStock(
         @PathVariable id: Long
     ) {
-        productService.decreaseStock(id)
+        productCommandUseCase.decreaseStock(id)
     }
 
     @GetMapping("/{id}")
     fun findProduct(
         @PathVariable id: Long
     ): ResponseDTO<ProductDTO> {
-        return ResponseDTO.success(ProductDTO.from(productService.findProduct(id)))
+        return ResponseDTO.success(ProductDTO.from(productReadUseCase.findProduct(id)))
     }
 
     @PutMapping("/{id}")
@@ -40,7 +41,7 @@ class ProductController(
         @PathVariable id: Long,
         @RequestBody product: ProductDTO
     ) {
-        productService.updateProduct(id, product.toVO())
+        productCommandUseCase.updateProduct(id, product.toVO())
     }
 
     @PostMapping
@@ -48,13 +49,13 @@ class ProductController(
     fun createProduct(
         @RequestBody product: ProductDTO
     ) {
-        productService.createProduct(product.toVO())
+        productCommandUseCase.createProduct(product.toVO())
     }
 
     @DeleteMapping("/{id}")
     fun deleteProduct(
         @PathVariable id: Long
     ) {
-        productService.deleteProduct(id)
+        productCommandUseCase.deleteProduct(id)
     }
 }
