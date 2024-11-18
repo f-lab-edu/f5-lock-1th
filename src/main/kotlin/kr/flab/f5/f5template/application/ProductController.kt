@@ -1,6 +1,7 @@
 package kr.flab.f5.f5template.application
 
 import io.swagger.annotations.Api
+import kr.flab.f5.f5template.common.ResponseDTO
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -30,8 +31,8 @@ class ProductController(
     @GetMapping("/{id}")
     fun findProduct(
         @PathVariable id: Long
-    ): ProductDTO {
-        return ProductDTO.from(productService.findProduct(id))
+    ): ResponseDTO<ProductDTO> {
+        return ResponseDTO.success(ProductDTO.from(productService.findProduct(id)))
     }
 
     @PutMapping("/{id}")
