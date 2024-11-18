@@ -1,4 +1,4 @@
-package kr.flab.f5.f5template.application
+package kr.flab.f5.f5template.service
 
 import kr.flab.f5.f5template.mysql.jpa.repository.ProductRepository
 import org.springframework.stereotype.Service
