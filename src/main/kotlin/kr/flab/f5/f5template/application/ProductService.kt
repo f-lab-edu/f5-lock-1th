@@ -49,7 +49,7 @@ class ProductService(
         productRepository.delete(product)
     }
 
-    fun findProductById(id:Long): Product {
+    private fun findProductById(id: Long): Product {
         return productRepository.findById(id).getOrNull() ?: throw ProductException(
             PRODUCT_NOT_FOUND,
             "${PRODUCT_NOT_FOUND.cause}$id"
