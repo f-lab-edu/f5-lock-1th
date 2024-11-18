@@ -1,7 +1,10 @@
 package kr.flab.f5.f5template.application
 
+import kr.flab.f5.f5template.common.exception.ExceptionCode.PRODUCT_NOT_FOUND
+import kr.flab.f5.f5template.common.exception.ProductException
 import kr.flab.f5.f5template.mysql.jpa.repository.ProductRepository
 import org.springframework.stereotype.Service
+import kotlin.jvm.optionals.getOrNull
 
 @Service
 class ProductService(
@@ -18,10 +21,46 @@ class ProductService(
     }
 
     fun decreaseStock(id: Long) {
-        val currentStock = stock[id] ?: throw IllegalArgumentException("No stock for product $id")
-        if (currentStock <= 0) {
-            throw IllegalArgumentException("No stock for product $id")
-        }
-        stock[id] = currentStock - 1
+        val product = productRepository.findById(id).getOrNull() ?: throw ProductException(
+            PRODUCT_NOT_FOUND,
+            "${PRODUCT_NOT_FOUND.cause}$id"
+        )
+
+        product.decreaseStock()
+
+        productRepository.save(product)
+    }
+
+    fun createProduct(product: ProductVO) {
+        productRepository.save(product.toProduct())
+    }
+
+    fun updateProduct(id: Long, product: ProductVO) {
+        val foundProduct = productRepository.findById(id).getOrNull()
+            ?: throw ProductException(
+                PRODUCT_NOT_FOUND,
+                "${PRODUCT_NOT_FOUND.cause}$id"
+            )
+        foundProduct.updateProduct(product.toProduct())
+
+        productRepository.save(foundProduct)
+    }
+
+    fun findProduct(id: Long): ProductVO {
+        return productRepository.findById(id).getOrNull()?.let {
+            ProductVO.from(it)
+        } ?: throw ProductException(
+            PRODUCT_NOT_FOUND,
+            "${PRODUCT_NOT_FOUND.cause}$id"
+        )
+    }
+
+    fun deleteProduct(id: Long) {
+        productRepository.findById(id).getOrNull()?.let {
+            productRepository.delete(it)
+        } ?: throw ProductException(
+            PRODUCT_NOT_FOUND,
+            "${PRODUCT_NOT_FOUND.cause}$id"
+        )
     }
 }
