@@ -2,6 +2,7 @@ package kr.flab.f5.f5template.application
 
 import kr.flab.f5.f5template.common.exception.ExceptionCode.PRODUCT_NOT_FOUND
 import kr.flab.f5.f5template.common.exception.ProductException
+import kr.flab.f5.f5template.mysql.jpa.entity.Product
 import kr.flab.f5.f5template.mysql.jpa.repository.ProductRepository
 import org.springframework.stereotype.Service
 import kotlin.jvm.optionals.getOrNull
@@ -10,7 +11,7 @@ import kotlin.jvm.optionals.getOrNull
 class ProductService(
     // 데이터베이스 없이 순수 자바로 동시성 이슈를 다뤄보기 위해 아직은 데이터베이스를 사용하지 않습니다.
     private val productRepository: ProductRepository,
-) {
+) : ProductCommandUseCase, ProductReadUseCase {
 
     private val stock = HashMap<Long, Int>()
 
@@ -20,45 +21,36 @@ class ProductService(
         stock[3] = 1000000
     }
 
-    fun decreaseStock(id: Long) {
-        val product = productRepository.findById(id).getOrNull() ?: throw ProductException(
-            PRODUCT_NOT_FOUND,
-            "${PRODUCT_NOT_FOUND.cause}$id"
-        )
+    override fun decreaseStock(id: Long) {
+        val foundProduct = findProductById(id)
 
-        product.decreaseStock()
-
-        productRepository.save(product)
+        foundProduct.decreaseStock()
+        productRepository.save(foundProduct)
     }
 
-    fun createProduct(product: ProductVO) {
+    override fun createProduct(product: ProductVO) {
         productRepository.save(product.toProduct())
     }
 
-    fun updateProduct(id: Long, product: ProductVO) {
-        val foundProduct = productRepository.findById(id).getOrNull()
-            ?: throw ProductException(
-                PRODUCT_NOT_FOUND,
-                "${PRODUCT_NOT_FOUND.cause}$id"
-            )
+    override fun updateProduct(id: Long, product: ProductVO) {
+        val foundProduct = findProductById(id)
         foundProduct.updateProduct(product.toProduct())
 
         productRepository.save(foundProduct)
     }
 
-    fun findProduct(id: Long): ProductVO {
-        return productRepository.findById(id).getOrNull()?.let {
-            ProductVO.from(it)
-        } ?: throw ProductException(
-            PRODUCT_NOT_FOUND,
-            "${PRODUCT_NOT_FOUND.cause}$id"
-        )
+    override fun findProduct(id: Long): ProductVO {
+        val product = findProductById(id)
+        return ProductVO.from(product)
     }
 
-    fun deleteProduct(id: Long) {
-        productRepository.findById(id).getOrNull()?.let {
-            productRepository.delete(it)
-        } ?: throw ProductException(
+    override fun deleteProduct(id: Long) {
+        val product = findProductById(id)
+        productRepository.delete(product)
+    }
+
+    fun findProductById(id:Long): Product {
+        return productRepository.findById(id).getOrNull() ?: throw ProductException(
             PRODUCT_NOT_FOUND,
             "${PRODUCT_NOT_FOUND.cause}$id"
         )
