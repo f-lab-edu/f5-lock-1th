@@ -16,7 +16,9 @@ class ProductServiceImpl(
     private val products = HashMap<Long, Product>()
 
     init {
-
+        products[1L] = Product(1, "test1", 10000, 10000)
+        products[2L] = Product(2, "test2", 20000, 20000)
+        products[3L] = Product(3, "test3", 30000, 30000)
     }
 
     override fun decreaseStock(id: Long) {
@@ -33,11 +35,12 @@ class ProductServiceImpl(
         product.increaseStock()
     }
 
-    override fun create(createDto: ProductCreateRequestDto) {
+    override fun create(createDto: ProductCreateRequestDto): Product {
         val size = products.size.toLong()
         val newProduct = Product(size, createDto.name, createDto.price, createDto.stock)
 
         products[size] = newProduct
+        return products[size] ?: throw RuntimeException("Product create failed")
     }
 
     override fun read(id: Long) : Product{
