@@ -27,11 +27,9 @@ class Product(
 
     @Column(name = "name")
     var name: String = name
-        private set
 
     @Column(name = "price")
     var price: Long = price
-        private set
 
     @Column(name = "stock")
     var stock: Long = stock
@@ -52,5 +50,15 @@ class Product(
             throw IllegalArgumentException("No stock for product $id")
         }
         stock -= 1
+    }
+
+    fun increaseStock() {
+        stock += 1
+    }
+
+    fun updateStock(amount: Long) {
+        if (stock + amount < 0) {
+            throw IllegalArgumentException("There is not enough stock to decrease")
+        }
     }
 }
