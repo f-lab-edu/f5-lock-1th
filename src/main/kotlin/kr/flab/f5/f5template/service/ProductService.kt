@@ -1,5 +1,8 @@
 package kr.flab.f5.f5template.service
 
+import kr.flab.f5.f5template.controller.request.CreateProductRequest
+import kr.flab.f5.f5template.controller.response.ProductResult
+import kr.flab.f5.f5template.mysql.jpa.entity.Product
 import kr.flab.f5.f5template.mysql.jpa.repository.ProductRepository
 import org.springframework.stereotype.Service
 
@@ -23,5 +26,18 @@ class ProductService(
             throw IllegalArgumentException("No stock for product $id")
         }
         stock[id] = currentStock - 1
+    }
+
+    fun createProduct(request: CreateProductRequest): ProductResult {
+        val product = Product(
+            name = request.name,
+            price = request.price,
+            stock = request.stock
+        )
+        productRepository.save(product)
+        return ProductResult(
+            id = product.id,
+            name = product.name
+        )
     }
 }

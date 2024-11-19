@@ -20,6 +20,13 @@ class Product(
     createdAt: Instant = Instant.now(),
     updatedAt: Instant = Instant.now(),
 ) {
+
+    init {
+        if (name.isEmpty()) {
+            throw IllegalArgumentException("상품명을 입력하지 않았습니다.")
+        }
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long = id
