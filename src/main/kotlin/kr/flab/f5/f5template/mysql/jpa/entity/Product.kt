@@ -60,5 +60,6 @@ class Product(
         if (stock + amount < 0) {
             throw IllegalArgumentException("There is not enough stock to decrease")
         }
+        stock += amount
     }
 }

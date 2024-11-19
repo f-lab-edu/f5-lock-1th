@@ -1,14 +1,13 @@
 package kr.flab.f5.f5template.application
 
 import kr.flab.f5.f5template.dto.ProductCreateRequestDto
-import kr.flab.f5.f5template.dto.ProductReadResponseDto
 import kr.flab.f5.f5template.dto.ProductUpdateRequestDto
 import kr.flab.f5.f5template.mysql.jpa.entity.Product
 import kr.flab.f5.f5template.mysql.jpa.repository.ProductRepository
 import org.springframework.stereotype.Service
 
 @Service
-class ProductServiceImpl(
+class ProductServiceHashMapImpl(
     // 데이터베이스 없이 순수 자바로 동시성 이슈를 다뤄보기 위해 아직은 데이터베이스를 사용하지 않습니다.
     private val productRepository: ProductRepository,
 ) : ProductService {
@@ -23,7 +22,7 @@ class ProductServiceImpl(
 
     override fun decreaseStock(id: Long) {
         val product = products[id] ?: throw IllegalArgumentException("No product numbered by $id")
-        val currentStock = product.stock ?: throw IllegalArgumentException("No stock for productId : $id ")
+        val currentStock = product.stock
         if (currentStock <= 0) {
             throw IllegalArgumentException("No stock for product $id")
         }
