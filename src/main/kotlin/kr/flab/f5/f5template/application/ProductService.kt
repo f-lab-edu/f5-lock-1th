@@ -1,5 +1,8 @@
 package kr.flab.f5.f5template.application
 
+import kr.flab.f5.f5template.error.BaseException
+import kr.flab.f5.f5template.error.ErrorCode.PRODUCT_ALREADY_EXISTS
+import kr.flab.f5.f5template.mysql.jpa.entity.Product
 import kr.flab.f5.f5template.mysql.jpa.repository.ProductRepository
 import org.springframework.stereotype.Service
 
@@ -23,5 +26,20 @@ class ProductService(
             throw IllegalArgumentException("No stock for product $id")
         }
         stock[id] = currentStock - 1
+    }
+
+    fun createStock(productCreateRequest: ProductCreateRequest) {
+
+        if (productRepository.existsProductByName(productCreateRequest.name)) {
+            throw BaseException(PRODUCT_ALREADY_EXISTS)
+        }
+
+        val product = Product(
+            name = productCreateRequest.name,
+            price = productCreateRequest.price,
+            stock = productCreateRequest.stock,
+        )
+
+        productRepository.save(product)
     }
 }
