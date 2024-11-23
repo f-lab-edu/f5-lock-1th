@@ -1,7 +1,10 @@
 package kr.flab.f5.f5template.mysql.jpa.entity
 
+import kr.flab.f5.f5template.exception.ApiException
+import kr.flab.f5.f5template.exception.ErrorType
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
+import org.springframework.http.HttpStatus
 import java.time.Instant
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -23,7 +26,7 @@ class Product(
 
     init {
         if (name.isEmpty()) {
-            throw IllegalArgumentException("상품명을 입력하지 않았습니다.")
+            throw ApiException("상품명을 입력하지 않았습니다.", ErrorType.INVALID_PARAMETER, HttpStatus.BAD_REQUEST)
         }
     }
 
@@ -59,5 +62,11 @@ class Product(
             throw IllegalArgumentException("No stock for product $id")
         }
         stock -= 1
+    }
+
+    fun reviseProduct(name: String, price: Long, stock: Long) {
+        this.name = name
+        this.price = price
+        this.stock = stock
     }
 }
