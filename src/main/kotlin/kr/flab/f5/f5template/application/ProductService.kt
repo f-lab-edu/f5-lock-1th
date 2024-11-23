@@ -1,5 +1,7 @@
 package kr.flab.f5.f5template.application
 
+import kr.flab.f5.f5template.application.dto.ProductCreateRequest
+import kr.flab.f5.f5template.application.dto.ProductDto
 import kr.flab.f5.f5template.error.BaseException
 import kr.flab.f5.f5template.error.ErrorCode.PRODUCT_ALREADY_EXISTS
 import kr.flab.f5.f5template.mysql.jpa.entity.Product
@@ -41,5 +43,17 @@ class ProductService(
         )
 
         productRepository.save(product)
+    }
+
+    fun findAllProducts(): List<ProductDto> {
+        val products = productRepository.findAll()
+        return products.map { product ->
+            ProductDto(
+                id = product.id,
+                name = product.name,
+                price = product.price,
+                stock = product.stock
+            )
+        }
     }
 }
