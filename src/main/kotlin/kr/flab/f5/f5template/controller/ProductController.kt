@@ -7,6 +7,8 @@ import kr.flab.f5.f5template.controller.response.ApiResponse
 import kr.flab.f5.f5template.controller.response.ProductResult
 import kr.flab.f5.f5template.service.ProductService
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -36,6 +38,12 @@ class ProductController(
         return ResponseEntity.ok().body(ApiResponse("상품 생성 성공", success = true, data = productResult))
     }
 
+    @GetMapping("/{id}")
+    fun getProduct(@PathVariable id: Long): ResponseEntity<ApiResponse<ProductResult>> {
+        val productResult = productService.getProduct(id)
+        return ResponseEntity.ok().body(ApiResponse("상품 조회 성공", success = true, data = productResult))
+    }
+
     @PutMapping("/{id}")
     fun reviseProduct(
         @PathVariable id: Long,
@@ -43,5 +51,13 @@ class ProductController(
     ): ResponseEntity<ApiResponse<ProductResult>> {
         val productResult = productService.reviseProduct(id, request)
         return ResponseEntity.ok().body(ApiResponse("상품 수정 성공", success = true, data = productResult))
+    }
+
+    @DeleteMapping("/{id}")
+    fun deleteProduct(
+        @PathVariable id: Long
+    ): ResponseEntity<ApiResponse<ProductResult>> {
+        val productResult = productService.deleteProduct(id)
+        return ResponseEntity.ok().body(ApiResponse("상품 삭제 성공", success = true, data = productResult))
     }
 }

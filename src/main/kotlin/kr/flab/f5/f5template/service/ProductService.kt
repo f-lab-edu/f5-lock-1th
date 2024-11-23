@@ -44,11 +44,29 @@ class ProductService(
         )
     }
 
+    fun getProduct(id: Long): ProductResult {
+        return productRepository.findById(id)
+            .orElseThrow { ApiException("상품 조회 실패", ErrorType.NO_RESOURCE, HttpStatus.OK) }
+            .run {
+                ProductResult(this.id, this.name, this.price, this.stock)
+            }
+    }
+
     fun reviseProduct(id: Long, request: SetProductRequest): ProductResult {
         return productRepository.findById(id)
             .orElseThrow { ApiException("상품 수정 실패", ErrorType.NO_RESOURCE, HttpStatus.OK) }
             .run {
                 this.reviseProduct(request.name, request.price, request.stock)
+                productRepository.save(this)
+                ProductResult(this.id, this.name)
+            }
+    }
+
+    fun deleteProduct(id: Long): ProductResult {
+        return productRepository.findById(id)
+            .orElseThrow { ApiException("상품 삭제 실패", ErrorType.NO_RESOURCE, HttpStatus.OK) }
+            .run {
+                productRepository.deleteById(id)
                 ProductResult(this.id, this.name)
             }
     }
