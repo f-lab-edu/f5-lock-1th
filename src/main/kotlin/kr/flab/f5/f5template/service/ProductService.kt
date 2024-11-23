@@ -1,9 +1,12 @@
 package kr.flab.f5.f5template.service
 
-import kr.flab.f5.f5template.controller.request.CreateProductRequest
+import kr.flab.f5.f5template.controller.request.SetProductRequest
 import kr.flab.f5.f5template.controller.response.ProductResult
+import kr.flab.f5.f5template.exception.ApiException
+import kr.flab.f5.f5template.exception.ErrorType
 import kr.flab.f5.f5template.mysql.jpa.entity.Product
 import kr.flab.f5.f5template.mysql.jpa.repository.ProductRepository
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 
 @Service
@@ -28,7 +31,7 @@ class ProductService(
         stock[id] = currentStock - 1
     }
 
-    fun createProduct(request: CreateProductRequest): ProductResult {
+    fun createProduct(request: SetProductRequest): ProductResult {
         val product = Product(
             name = request.name,
             price = request.price,
@@ -39,5 +42,14 @@ class ProductService(
             id = product.id,
             name = product.name
         )
+    }
+
+    fun reviseProduct(id: Long, request: SetProductRequest): ProductResult {
+        return productRepository.findById(id)
+            .orElseThrow { ApiException("상품 수정 실패", ErrorType.NO_RESOURCE, HttpStatus.OK) }
+            .run {
+                this.reviseProduct(request.name, request.price, request.stock)
+                ProductResult(this.id, this.name)
+            }
     }
 }
