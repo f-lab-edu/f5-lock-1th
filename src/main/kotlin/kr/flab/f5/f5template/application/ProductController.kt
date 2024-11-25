@@ -2,6 +2,7 @@ package kr.flab.f5.f5template.application
 
 import io.swagger.annotations.Api
 import kr.flab.f5.f5template.application.dto.ProductCreateRequest
+import kr.flab.f5.f5template.application.dto.ProductUpdateRequest
 import kr.flab.f5.f5template.result.ResultCode.*
 import kr.flab.f5.f5template.result.ResultResponse
 import org.springframework.http.ResponseEntity
@@ -37,5 +38,14 @@ class ProductController(
     fun findAllProducts(): ResponseEntity<ResultResponse> {
         val findAllProducts = productService.findAllProducts()
         return ResponseEntity.ok(ResultResponse.of(PRODUCT_FIND_SUCCESS, findAllProducts))
+    }
+
+    @PatchMapping("/{productId}")
+    fun updateProduct(
+        @PathVariable productId: Long, // URL 경로에서 productId 추출
+        @RequestBody updateRequest: ProductUpdateRequest // 요청 본문에서 업데이트 정보 추출
+    ): ResponseEntity<ResultResponse> {
+        productService.updateProduct(productId, updateRequest)
+        return ResponseEntity.ok(ResultResponse.of(PRODUCT_UPDATE_SUCCESS))
     }
 }
