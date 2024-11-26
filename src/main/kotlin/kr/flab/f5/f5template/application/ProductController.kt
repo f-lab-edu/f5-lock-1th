@@ -15,7 +15,7 @@ class ProductController(
 ) : ProductControllerSpecification {
     @PostMapping
     override fun createStock(stock: Int) {
-        productService.create(stock)
+        productService.createStock(stock)
     }
 
     @GetMapping("/{id}/stock")

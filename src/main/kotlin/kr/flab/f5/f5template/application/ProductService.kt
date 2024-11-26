@@ -21,7 +21,7 @@ class ProductService(
         id = AtomicLong(stock.size.toLong())
     }
 
-    fun create(quantity: Int) {
+    fun createStock(quantity: Int) {
         stock[id.incrementAndGet()] = quantity
     }
 

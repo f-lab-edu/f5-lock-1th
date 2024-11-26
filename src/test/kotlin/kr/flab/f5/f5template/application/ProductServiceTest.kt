@@ -13,7 +13,7 @@ class ProductServiceTest {
 
     @Test
     fun createProductTest() {
-        productService.create(10)
+        productService.createStock(10)
     }
 
     @Test
