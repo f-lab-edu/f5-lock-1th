@@ -26,6 +26,7 @@ class ProductService(
         stock[id.incrementAndGet()] = quantity
     }
 
+    @Synchronized
     fun decreaseStock(id: Long) {
         val currentStock = stock[id] ?: throw IllegalArgumentException("No stock for product $id")
         if (currentStock <= 0) {
@@ -34,6 +35,7 @@ class ProductService(
         stock[id] = currentStock - 1
     }
 
+    @Synchronized
     fun increaseStock(id: Long) {
         val currentStock = stock[id] ?: throw IllegalArgumentException("No stock for product $id")
         if (currentStock <= 0) {
