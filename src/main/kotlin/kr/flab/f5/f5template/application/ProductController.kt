@@ -6,6 +6,7 @@ import kr.flab.f5.f5template.application.dto.ProductUpdateRequest
 import kr.flab.f5.f5template.result.ResultCode.*
 import kr.flab.f5.f5template.result.ResultResponse
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -47,5 +48,11 @@ class ProductController(
     ): ResponseEntity<ResultResponse> {
         productService.updateProduct(productId, updateRequest)
         return ResponseEntity.ok(ResultResponse.of(PRODUCT_UPDATE_SUCCESS))
+    }
+
+    @DeleteMapping("/delete/{deleteId}")
+    fun deleteProduct(@PathVariable deleteId: Long): ResponseEntity<ResultResponse> {
+        productService.deleteProduct(deleteId)
+        return ResponseEntity.ok(ResultResponse.of(PRODUCT_DELETE_SUCCESS))
     }
 }

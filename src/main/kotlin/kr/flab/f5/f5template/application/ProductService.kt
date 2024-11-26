@@ -65,4 +65,9 @@ class ProductService(
         val product = productRepository.findById(productId).orElseThrow { BaseException(PRODUCT_NOT_FOUND) }
         product.updateProduct(updateRequest.name, updateRequest.price, updateRequest.stock)
     }
+
+    fun deleteProduct(productId: Long) {
+        val product = productRepository.findById(productId).orElseThrow { BaseException(PRODUCT_NOT_FOUND) }
+        productRepository.delete(product)
+    }
 }
