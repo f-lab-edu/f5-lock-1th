@@ -32,4 +32,18 @@ class ProductServiceTest {
             assert(e.message == "No stock for product $NOT_EXIST_PRODUCT_ID")
         }
     }
+
+    @Test
+    fun increaseProductStockTest() {
+        productService.increaseStock(1)
+        val searchStock = productService.searchStock(1)
+        assert(searchStock >= DEFAULT_STOCK)
+    }
+
+    @Test
+    fun decreaseProductStockTest() {
+        productService.decreaseStock(1)
+        val searchStock = productService.searchStock(1)
+        assert(searchStock <= DEFAULT_STOCK)
+    }
 }

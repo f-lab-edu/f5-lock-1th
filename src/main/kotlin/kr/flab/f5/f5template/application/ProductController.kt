@@ -31,7 +31,7 @@ class ProductController(
     override fun increaseStock(
         @PathVariable id: Long,
     ) {
-        TODO("Not yet implemented")
+        productService.increaseStock(id)
     }
 
     @PostMapping("/{id}/stock/decrement")
