@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 
 const val NOT_EXIST_PRODUCT_ID = -1L
-const val TEST_QUANTITY = 99
 
 @SpringBootTest
 class ProductServiceTest {
@@ -45,5 +44,17 @@ class ProductServiceTest {
         productService.decreaseStock(1)
         val searchStock = productService.searchStock(1)
         assert(searchStock <= DEFAULT_STOCK)
+    }
+
+    @Test
+    fun removeProductStockTest() {
+        val id = 3L
+        productService.removeStock(id)
+        try {
+            productService.searchStock(id)
+        } catch (e: Exception) {
+            assert(e is IllegalArgumentException)
+            assert(e.message == "No stock for product $id")
+        }
     }
 }

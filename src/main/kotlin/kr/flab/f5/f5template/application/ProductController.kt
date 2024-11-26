@@ -42,7 +42,7 @@ class ProductController(
     }
 
     override fun removeStock(id: Long) {
-        TODO("Not yet implemented")
+        productService.removeStock(id)
     }
 }
 

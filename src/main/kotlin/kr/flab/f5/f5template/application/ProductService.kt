@@ -42,6 +42,14 @@ class ProductService(
     }
 
     fun searchStock(id: Long): Int = stock[id] ?: throw IllegalArgumentException("No stock for product $id")
+
+    fun removeStock(id: Long) {
+        val currentStock = stock[id] ?: throw IllegalArgumentException("No stock for product $id")
+        if (currentStock <= 0) {
+            throw IllegalArgumentException("No stock for product $id")
+        }
+        stock.remove(id)
+    }
 }
 
 // fun main() {
