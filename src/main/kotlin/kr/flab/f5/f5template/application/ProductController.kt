@@ -21,9 +21,11 @@ class ProductController(
     @GetMapping("/{id}/stock")
     override fun searchStock(
         @PathVariable id: Long,
-    ): ProductSearchResponse {
-        TODO("Not yet implemented")
-    }
+    ): ProductSearchResponse =
+        ProductSearchResponse(
+            id = id,
+            stock = productService.searchStock(id),
+        )
 
     @PostMapping("/{id}/stock/increment")
     override fun increaseStock(
