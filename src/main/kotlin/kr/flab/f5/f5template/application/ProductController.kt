@@ -14,8 +14,7 @@ class ProductController(
     private val productService: ProductService,
 ) : ProductControllerSpecification {
     @PostMapping
-    override fun createStock(id: Long) {
-        TODO("Not yet implemented")
+    override fun createStock(stock: Int) {
     }
 
     @GetMapping("/{id}/stock")

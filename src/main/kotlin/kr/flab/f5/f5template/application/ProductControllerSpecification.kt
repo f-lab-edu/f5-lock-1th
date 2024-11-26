@@ -11,7 +11,7 @@ interface ProductControllerSpecification {
         description = "id에 해당하는 상품의 재고를 1로 설정합니다.",
     )
     @ApiResponse(responseCode = "200", description = "상품 생성 성공")
-    fun createStock(id: Long)
+    fun createStock(stock: Int)
 
     @Operation(
         summary = "상품 재고 검색 API",
