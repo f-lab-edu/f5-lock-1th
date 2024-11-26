@@ -43,8 +43,8 @@ class ProductController(
 
     @PatchMapping("/{productId}")
     fun updateProduct(
-        @PathVariable productId: Long, // URL 경로에서 productId 추출
-        @RequestBody updateRequest: ProductUpdateRequest // 요청 본문에서 업데이트 정보 추출
+        @PathVariable productId: Long,
+        @RequestBody updateRequest: ProductUpdateRequest
     ): ResponseEntity<ResultResponse> {
         productService.updateProduct(productId, updateRequest)
         return ResponseEntity.ok(ResultResponse.of(PRODUCT_UPDATE_SUCCESS))
