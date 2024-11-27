@@ -1,5 +1,6 @@
 package kr.flab.f5.f5template.mysql.jpa.entity
 
+import kr.flab.f5.f5template.product.presentation.response.ProductResponse
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
 import java.time.Instant
@@ -53,4 +54,22 @@ class Product(
         }
         stock -= 1
     }
+
+    fun update(
+        name: String,
+        price: Long,
+        stock: Long
+    ) {
+        this.name = name
+        this.price = price
+        this.stock = stock
+    }
+
+    fun toResponse() = ProductResponse(
+        id = this.id,
+        name = this.name,
+        price = this.price,
+        stock = this.stock
+    )
+
 }
