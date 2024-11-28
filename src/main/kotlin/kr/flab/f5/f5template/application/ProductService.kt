@@ -21,6 +21,7 @@ class ProductService(
         stock[3] = 1000000
     }
 
+    @Synchronized
     override fun decreaseStock(id: Long) {
         val foundProduct = findProductById(id)
 
