@@ -13,7 +13,7 @@ class ProductServiceTest {
 
     @Test
     fun createProductTest() {
-        productService.createStock(10)
+        productService.createProduct(10)
     }
 
     @Test
@@ -49,7 +49,7 @@ class ProductServiceTest {
     @Test
     fun removeProductStockTest() {
         val id = 3L
-        productService.removeStock(id)
+        productService.removeProduct(id)
         try {
             productService.searchStock(id)
         } catch (e: Exception) {

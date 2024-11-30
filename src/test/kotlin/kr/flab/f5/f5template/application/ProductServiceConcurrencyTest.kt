@@ -19,7 +19,7 @@ class ProductServiceConcurrencyTest {
         repeat(1000) {
             executorService.submit {
                 repeat(1000) {
-                    productService.createStock(1)
+                    productService.createProduct(1)
                     createCount.incrementAndGet()
                 }
             }

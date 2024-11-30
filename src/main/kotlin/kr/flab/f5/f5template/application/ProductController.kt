@@ -1,6 +1,7 @@
 package kr.flab.f5.f5template.application
 
 import io.swagger.annotations.Api
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -14,15 +15,15 @@ class ProductController(
     private val productService: ProductService,
 ) : ProductControllerSpecification {
     @PostMapping
-    override fun createStock(stock: Int) {
-        productService.createStock(stock)
+    override fun createProduct(stock: Int) {
+        productService.createProduct(stock)
     }
 
     @GetMapping("/{id}/stock")
     override fun searchStock(
         @PathVariable id: Long,
-    ): ProductSearchResponse =
-        ProductSearchResponse(
+    ): ProductStockResponse =
+        ProductStockResponse(
             id = id,
             stock = productService.searchStock(id),
         )
@@ -41,12 +42,15 @@ class ProductController(
         productService.decreaseStock(id)
     }
 
-    override fun removeStock(id: Long) {
-        productService.removeStock(id)
+    @DeleteMapping("/{id}")
+    override fun removeProduct(
+        @PathVariable id: Long,
+    ) {
+        productService.removeProduct(id)
     }
 }
 
-data class ProductSearchResponse(
+data class ProductStockResponse(
     val id: Long,
     val stock: Int,
 )

@@ -22,7 +22,7 @@ class ProductService(
         id = AtomicLong(stock.size.toLong())
     }
 
-    fun createStock(quantity: Int) {
+    fun createProduct(quantity: Int) {
         stock[id.incrementAndGet()] = quantity
     }
 
@@ -46,7 +46,7 @@ class ProductService(
 
     fun searchStock(id: Long): Int = stock[id] ?: throw IllegalArgumentException("No stock for product $id")
 
-    fun removeStock(id: Long) {
+    fun removeProduct(id: Long) {
         val currentStock = stock[id] ?: throw IllegalArgumentException("No stock for product $id")
         if (currentStock <= 0) {
             throw IllegalArgumentException("No stock for product $id")
