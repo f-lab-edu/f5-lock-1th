@@ -54,26 +54,3 @@ class ProductService(
         stock.remove(id)
     }
 }
-
-// fun main() {
-//     val id = AtomicLong(1)
-//     val map = ConcurrentHashMap<Long, Long>()
-//
-//     val executorService = Executors.newFixedThreadPool(100)
-//
-//     repeat(1000) {
-//         executorService.submit {
-//             repeat(1000) {
-//                 map.compute(id.getAndIncrement()) { _, value -> value?.plus(1) ?: 1 }
-//             }
-//         }
-//     }
-//     executorService.shutdown()
-//
-//     while (!executorService.isTerminated) {
-//         Thread.sleep(100)
-//     }
-//
-//     println(map.size)
-//     println(map.values.sum())
-// }
