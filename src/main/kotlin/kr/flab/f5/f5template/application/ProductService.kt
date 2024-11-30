@@ -13,17 +13,17 @@ class ProductService(
     private val productRepository: ProductRepository,
 ) {
     private val stock = ConcurrentHashMap<Long, Int>()
-    private lateinit var id: AtomicLong
+    private lateinit var idCounter: AtomicLong
 
     init {
         stock[1] = DEFAULT_STOCK
         stock[2] = DEFAULT_STOCK
         stock[3] = DEFAULT_STOCK
-        id = AtomicLong(stock.size.toLong())
+        idCounter = AtomicLong(stock.size.toLong())
     }
 
     fun createProduct(quantity: Int) {
-        stock[id.incrementAndGet()] = quantity
+        stock[idCounter.incrementAndGet()] = quantity
     }
 
     @Synchronized
