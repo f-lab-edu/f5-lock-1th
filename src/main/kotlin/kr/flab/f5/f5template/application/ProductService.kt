@@ -53,7 +53,7 @@ class ProductService(
     private fun findProductById(id: Long): Product {
         return productRepository.findById(id).getOrNull() ?: throw ProductException(
             PRODUCT_NOT_FOUND,
-            "${PRODUCT_NOT_FOUND.cause}$id"
+            PRODUCT_NOT_FOUND.cause
         )
     }
 }
