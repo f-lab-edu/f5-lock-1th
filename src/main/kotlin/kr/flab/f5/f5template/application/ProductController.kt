@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation
 import kr.flab.f5.f5template.dto.CreateProductDto
 import kr.flab.f5.f5template.dto.UpdateProductDto
 import kr.flab.f5.f5template.mysql.jpa.entity.Product
+import kr.flab.f5.f5template.redis.RedisCacheExample
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
@@ -19,7 +20,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/products")
 class ProductController(
-    private val productService: ProductService
+    private val productService: ProductService,
+    private val redisCacheExample: RedisCacheExample
 ) {
 
     @PostMapping
@@ -51,5 +53,10 @@ class ProductController(
         @PathVariable id: Long
     ) {
         productService.decreaseStock(id)
+    }
+
+    @GetMapping("/hellp/{name}")
+    fun hello(@PathVariable name: String): String {
+        return redisCacheExample.cacheMethod(name)
     }
 }

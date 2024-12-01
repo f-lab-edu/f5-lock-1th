@@ -1,5 +1,7 @@
 package kr.flab.f5.f5template.redis
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean
@@ -15,7 +17,12 @@ import java.time.Duration
 @EnableCaching
 @Configuration
 class RedisConfig {
-
+    @Bean
+    fun objectMapper(): ObjectMapper {
+        val objectMapper = ObjectMapper()
+        objectMapper.registerModule(JavaTimeModule())
+        return objectMapper
+    }
     @Bean
     fun redisCacheManager(connectionFactory: RedisConnectionFactory): CacheManager {
         return RedisCacheManager.builder(connectionFactory)
@@ -29,7 +36,7 @@ class RedisConfig {
                     )
                     .serializeValuesWith(
                         RedisSerializationContext.SerializationPair.fromSerializer(
-                            GenericJackson2JsonRedisSerializer()
+                            GenericJackson2JsonRedisSerializer(objectMapper())
                         )
                     )
             )

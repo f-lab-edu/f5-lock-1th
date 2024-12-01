@@ -8,6 +8,7 @@ class RedisCacheExample {
 
     @Cacheable(value = ["cacheMethod"], key = "#name")
     fun cacheMethod(name: String): String {
+        println("not cached!! $name")
         return "Hello, $name!"
     }
 }

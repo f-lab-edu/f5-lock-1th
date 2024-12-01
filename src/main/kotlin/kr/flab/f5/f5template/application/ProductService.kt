@@ -4,6 +4,7 @@ import kr.flab.f5.f5template.dto.CreateProductDto
 import kr.flab.f5.f5template.dto.UpdateProductDto
 import kr.flab.f5.f5template.mysql.jpa.entity.Product
 import kr.flab.f5.f5template.mysql.jpa.repository.ProductRepository
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
