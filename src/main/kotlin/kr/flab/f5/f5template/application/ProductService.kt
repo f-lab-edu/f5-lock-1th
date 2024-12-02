@@ -1,7 +1,13 @@
 package kr.flab.f5.f5template.application
 
+import kr.flab.f5.f5template.application.dto.ProductDto
+import kr.flab.f5.f5template.application.exception.ProductNotFoundException
+import kr.flab.f5.f5template.application.request.ProductCreateRequest
+import kr.flab.f5.f5template.application.request.ProductUpdateRequest
+import kr.flab.f5.f5template.mysql.jpa.entity.Product
 import kr.flab.f5.f5template.mysql.jpa.repository.ProductRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class ProductService(
@@ -23,5 +29,34 @@ class ProductService(
             throw IllegalArgumentException("No stock for product $id")
         }
         stock[id] = currentStock - 1
+    }
+
+    fun createStock(request: ProductCreateRequest): ProductDto {
+        val product = Product(
+            name = request.name,
+            price = request.price,
+            stock = request.stock,
+        )
+
+        return ProductDto.Companion.fromEntity(productRepository.save(product))
+    }
+
+    @Transactional(readOnly = true)
+    fun findById(id: Long): Product? {
+        return productRepository.findById(id)
+            .orElseThrow { ProductNotFoundException(id) }
+    }
+
+    fun updateProduct(request: ProductUpdateRequest) {
+        val product = productRepository.findById(request.id)
+            .orElseThrow { ProductNotFoundException(request.id) }
+        product.update(request.name, request.price, request.stock)
+    }
+
+    fun deleteProduct(productId: Long) {
+        val product = productRepository.findById(productId)
+            .orElseThrow { ProductNotFoundException(productId) }
+
+        productRepository.delete(product)
     }
 }
