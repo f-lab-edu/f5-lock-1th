@@ -42,12 +42,12 @@ class ProductServiceHashMapImpl(
         return products[size] ?: throw RuntimeException("Product create failed")
     }
 
-    override fun read(id: Long) : Product{
+    override fun read(id: Long): Product {
         val product = products[id] ?: throw IllegalArgumentException("No product numbered by $id")
         return product
     }
 
-    override fun update(id: Long, updateDto: ProductUpdateRequestDto) : Product{
+    override fun update(id: Long, updateDto: ProductUpdateRequestDto): Product {
         val product = read(id)
         product.name = updateDto.name
         product.price = updateDto.price

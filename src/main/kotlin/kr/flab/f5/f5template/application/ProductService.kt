@@ -1,7 +1,6 @@
 package kr.flab.f5.f5template.application
 
 import kr.flab.f5.f5template.dto.ProductCreateRequestDto
-import kr.flab.f5.f5template.dto.ProductReadResponseDto
 import kr.flab.f5.f5template.dto.ProductUpdateRequestDto
 import kr.flab.f5.f5template.mysql.jpa.entity.Product
 

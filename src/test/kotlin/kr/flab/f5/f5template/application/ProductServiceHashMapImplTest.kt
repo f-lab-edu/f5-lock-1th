@@ -3,11 +3,10 @@ package kr.flab.f5.f5template.application
 import kr.flab.f5.f5template.dto.ProductCreateRequestDto
 import kr.flab.f5.f5template.dto.ProductUpdateRequestDto
 import kr.flab.f5.f5template.mysql.jpa.repository.ProductRepository
-import org.assertj.core.api.Assertions.*
-import org.junit.jupiter.api.Test
-
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatCode
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension

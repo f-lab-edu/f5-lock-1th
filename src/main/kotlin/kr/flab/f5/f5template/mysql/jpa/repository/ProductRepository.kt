@@ -7,6 +7,6 @@ import java.util.Optional
 
 @Repository
 interface ProductRepository : JpaRepository<Product, Long> {
-    override fun findById(id: Long): Optional<Product>;
-    override fun deleteById(id: Long);
+    override fun findById(id: Long): Optional<Product>
+    override fun deleteById(id: Long)
 }
