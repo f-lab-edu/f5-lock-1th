@@ -63,11 +63,3 @@ configurations {
         exclude(group = "org.springframework.boot", module = "spring-boot-starter-logging")
     }
 }
-
-tasks.named("ktlintMainSourceSetCheck").configure {
-    enabled = false
-}
-
-tasks.named("ktlintTestSourceSetCheck").configure {
-    enabled = false
-}
