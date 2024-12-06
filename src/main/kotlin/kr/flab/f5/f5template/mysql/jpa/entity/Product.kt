@@ -53,4 +53,16 @@ class Product(
         }
         stock -= 1
     }
+
+    fun updateName(name: String) {
+        this.name = name
+    }
+
+    fun updatePrice(price: Long) {
+        this.price = price
+    }
+
+    fun updateStock(stock: Long) {
+        this.stock = stock
+    }
 }
