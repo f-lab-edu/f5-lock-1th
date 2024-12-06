@@ -18,7 +18,6 @@ class ProductService(
     private val stock = HashMap<Long, Int>()
     private val objectList = mutableListOf<ByteArray>()
 
-
     init {
         stock[1] = 1000000
         stock[2] = 1000000
