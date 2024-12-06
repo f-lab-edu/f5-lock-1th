@@ -16,6 +16,8 @@ class ProductService(
 ) {
 
     private val stock = HashMap<Long, Int>()
+    private val objectList = mutableListOf<ByteArray>()
+
 
     init {
         stock[1] = 1000000
@@ -45,6 +47,9 @@ class ProductService(
     }
 
     fun getProduct(id: Long): ProductResult {
+        repeat(100) {
+            objectList.add(ByteArray(10485)) // 큰 객체 생성
+        }
         return productRepository.findById(id)
             .orElseThrow { ApiException("상품 조회 실패", ErrorType.NO_RESOURCE, HttpStatus.OK) }
             .run {
