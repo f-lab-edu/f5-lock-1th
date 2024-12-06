@@ -3,14 +3,14 @@ POST http://localhost:8080/products
 Content-Type: application/json
 
 {
-  "name": "Product 2",
+  "name": "Product 3",
   "price": 100,
   "quantity": 10
 }
 
 ###
 
-PUT http://localhost:8080/products/2
+PUT http://localhost:8080/products/3
 Content-Type: application/json
 
 {
