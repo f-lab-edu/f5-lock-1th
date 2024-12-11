@@ -30,9 +30,11 @@ dependencies {
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("io.github.microutils:kotlin-logging:3.0.5")
 
     implementation("io.springfox:springfox-boot-starter:3.0.0")
     implementation("io.springfox:springfox-swagger-ui:3.0.0")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
 
     implementation("org.apache.httpcomponents:httpcore:4.4.15")
     implementation("org.apache.httpcomponents:httpclient:4.5.13")
