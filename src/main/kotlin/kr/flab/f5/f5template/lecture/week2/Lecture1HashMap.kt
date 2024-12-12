@@ -2,49 +2,53 @@ package kr.flab.f5.f5template.lecture.week2
 
 import java.util.concurrent.atomic.AtomicReference
 
-data class Element<K, V>(
+data class Node<K, V>(
     val key: K,
-    var value: V,
-)
+    @Volatile var value: V,
+    val next: AtomicReference<Node<K, V>?>)
 
 class Lecture1HashMap<K, V> : java.util.Map<K, V> {
     private val innerMap = HashMap<K, V>()
-    private val mapRef: AtomicReference<Map<Int, AtomicReference<Element<K, V>>>> = AtomicReference(emptyMap())
+    private val head = AtomicReference<Node<K, V>?>(null)
 
     override fun get(key: Any?): V? {
-        val hash = key.hashCode()
-        val currentRef = mapRef.get() ?: return  null
-
-        val readNode = currentRef[hash]
-        if (readNode != null) return readNode.get().value
+        if (key == null) return null
+        var current = head.get()
+        while (current != null) {
+            if (current.key == key) {
+                return current.value
+            }
+            current = current.next.get()
+        }
         return null
     }
 
     override fun put(key: K, value: V): V? {
-        val hash = key.hashCode();
-        var currentMap: Map<Int, AtomicReference<Element<K, V>>>
-        var newMap: Map<Int, AtomicReference<Element<K, V>>>
+        while (true) {
+            var prev: Node<K, V>? = null
+            var current = head.get()
 
-        do {
-            currentMap = mapRef.get()
+            while (current != null) {
+                if (current.key == key) {
+                    val oldValue = current.value
+                    current.value = value
+                    return oldValue
+                }
+                prev = current
+                current = current.next.get()
+            }
 
-            newMap = if (currentMap.isEmpty()) {
-                val newElement = Element(key, value)
-                mapOf(hash to AtomicReference(newElement))
+            val newNode = Node(key, value, AtomicReference(null))
+            if (prev == null) {
+                if (head.compareAndSet(null, newNode)) {
+                    return null
+                }
             } else {
-                currentMap.toMutableMap().apply {
-                    if (containsKey(hash)) {
-                        val elementRef = this[hash]
-                        val currentElement = elementRef?.get()
-                        elementRef?.set(currentElement?.copy(value = value) ?: Element(key, value))
-                    } else {
-                        val newElement = Element(key, value)
-                        this[hash] = AtomicReference(newElement)
-                    }
+                if (prev.next.compareAndSet(null, newNode)) {
+                    return null
                 }
             }
-        } while(!mapRef.compareAndSet(currentMap, newMap))
-        return null
+        }
     }
 
     override fun remove(key: Any?): V? {
@@ -56,11 +60,17 @@ class Lecture1HashMap<K, V> : java.util.Map<K, V> {
     }
 
     override fun size(): Int {
-        return mapRef.get().size - 1
+        var count = 0
+        var current = head.get()
+        while (current != null) {
+            count++
+            current = current.next.get()
+        }
+        return count
     }
 
     override fun isEmpty(): Boolean {
-        return innerMap.isEmpty()
+        return head.get() == null
     }
 
     // ------- 이 아래는 구현하지 않으셔도 됩니다 ----------
