@@ -1,65 +1,50 @@
 package kr.flab.f5.f5template.lecture.week2
 
-import java.lang.invoke.MethodHandles
-import java.lang.invoke.VarHandle
 import java.util.concurrent.atomic.AtomicReference
-import java.util.concurrent.locks.ReentrantLock
-import kotlin.concurrent.withLock
 
-data class Node<K, V>(
+data class Element<K, V>(
     val key: K,
-    @Volatile var value: V,
-    val hash: Int,
-    @Volatile var next: Node<K, V>? = null
+    var value: V,
 )
 
 class Lecture1HashMap<K, V> : java.util.Map<K, V> {
     private val innerMap = HashMap<K, V>()
-    private val table: Array<AtomicReference<Node<K, V>>?> = Array(16) { null }
+    private val mapRef: AtomicReference<Map<Int, AtomicReference<Element<K, V>>>> = AtomicReference(emptyMap())
 
     override fun get(key: Any?): V? {
         val hash = key.hashCode()
-        val index = hash and (table.size - 1)
-        val currentRef = table[index] ?: return  null
+        val currentRef = mapRef.get() ?: return  null
 
-        var readNode = currentRef.get()
-        while(readNode != null) {
-            if (readNode.key == key) {
-                return readNode.value
-            }
-            readNode = readNode.next
-        }
-
+        val readNode = currentRef[hash]
+        if (readNode != null) return readNode.get().value
         return null
     }
 
     override fun put(key: K, value: V): V? {
         val hash = key.hashCode();
-        val index = hash and (table.size - 1)
+        var currentMap: Map<Int, AtomicReference<Element<K, V>>>
+        var newMap: Map<Int, AtomicReference<Element<K, V>>>
 
-        var currentRef = table[index]
-        if(currentRef == null) {
-            val insertNode = Node(key, value, hash)
-            currentRef = AtomicReference(insertNode)
+        do {
+            currentMap = mapRef.get()
 
-            table[index] = currentRef
-            return null
-        }
-
-        var currentNode = currentRef.get()
-        while(currentNode != null) {
-            if(currentNode.key == key) {
-                val prevValue = currentNode.value
-                currentNode.value = value
-                return prevValue
+            newMap = if (currentMap.isEmpty()) {
+                val newElement = Element(key, value)
+                mapOf(hash to AtomicReference(newElement))
+            } else {
+                currentMap.toMutableMap().apply {
+                    if (containsKey(hash)) {
+                        val elementRef = this[hash]
+                        val currentElement = elementRef?.get()
+                        elementRef?.set(currentElement?.copy(value = value) ?: Element(key, value))
+                    } else {
+                        val newElement = Element(key, value)
+                        this[hash] = AtomicReference(newElement)
+                    }
+                }
             }
-            currentNode = currentNode.next
-        }
-
-        val insertNode = Node(key, value, hash, currentRef.get())
-        currentRef.set(insertNode)
+        } while(!mapRef.compareAndSet(currentMap, newMap))
         return null
-
     }
 
     override fun remove(key: Any?): V? {
@@ -71,16 +56,7 @@ class Lecture1HashMap<K, V> : java.util.Map<K, V> {
     }
 
     override fun size(): Int {
-        var size = 0
-        for(nodeRef in table) {
-            var currentNode = nodeRef?.get()
-            while(currentNode != null) {
-                size++
-                currentNode = currentNode.next
-            }
-        }
-
-        return size
+        return mapRef.get().size - 1
     }
 
     override fun isEmpty(): Boolean {
