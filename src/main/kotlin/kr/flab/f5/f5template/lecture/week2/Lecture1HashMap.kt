@@ -1,15 +1,65 @@
 package kr.flab.f5.f5template.lecture.week2
 
-class Lecture1HashMap<K, V> : java.util.Map<K, V> {
+import java.lang.invoke.MethodHandles
+import java.lang.invoke.VarHandle
+import java.util.concurrent.atomic.AtomicReference
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
+data class Node<K, V>(
+    val key: K,
+    @Volatile var value: V,
+    val hash: Int,
+    @Volatile var next: Node<K, V>? = null
+)
+
+class Lecture1HashMap<K, V> : java.util.Map<K, V> {
     private val innerMap = HashMap<K, V>()
+    private val table: Array<AtomicReference<Node<K, V>>?> = Array(16) { null }
 
     override fun get(key: Any?): V? {
-        return innerMap[key]
+        val hash = key.hashCode()
+        val index = hash and (table.size - 1)
+        val currentRef = table[index] ?: return  null
+
+        var readNode = currentRef.get()
+        while(readNode != null) {
+            if (readNode.key == key) {
+                return readNode.value
+            }
+            readNode = readNode.next
+        }
+
+        return null
     }
 
     override fun put(key: K, value: V): V? {
-        return innerMap.put(key, value)
+        val hash = key.hashCode();
+        val index = hash and (table.size - 1)
+
+        var currentRef = table[index]
+        if(currentRef == null) {
+            val insertNode = Node(key, value, hash)
+            currentRef = AtomicReference(insertNode)
+
+            table[index] = currentRef
+            return null
+        }
+
+        var currentNode = currentRef.get()
+        while(currentNode != null) {
+            if(currentNode.key == key) {
+                val prevValue = currentNode.value
+                currentNode.value = value
+                return prevValue
+            }
+            currentNode = currentNode.next
+        }
+
+        val insertNode = Node(key, value, hash, currentRef.get())
+        currentRef.set(insertNode)
+        return null
+
     }
 
     override fun remove(key: Any?): V? {
@@ -21,7 +71,16 @@ class Lecture1HashMap<K, V> : java.util.Map<K, V> {
     }
 
     override fun size(): Int {
-        return innerMap.size
+        var size = 0
+        for(nodeRef in table) {
+            var currentNode = nodeRef?.get()
+            while(currentNode != null) {
+                size++
+                currentNode = currentNode.next
+            }
+        }
+
+        return size
     }
 
     override fun isEmpty(): Boolean {
