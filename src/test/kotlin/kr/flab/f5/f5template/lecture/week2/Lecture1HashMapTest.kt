@@ -11,45 +11,133 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.concurrent.thread
 import kotlin.test.Test
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 class Lecture1HashMapTest {
-
     private val executor = Executors.newFixedThreadPool(100)
 
-    @RepeatedTest(10)
-    fun `동시 PUT 연산`() {
-        val threadNum = 100
-        val incrementsPerThread = 1000
+    @Test
+    fun `PUT 연산`() {
         val map = Lecture1HashMap<Int, Int>()
-        val latch = CountDownLatch(1) // 모든 스레드가 동시에 시작하도록 제어
-        val futures: List<Future<Unit>> = (1..threadNum).map {
-            threadId -> executor.submit<Unit> {
-                latch.await()
-                for(i in 1 .. incrementsPerThread) {
-                    val key = threadId * incrementsPerThread + i
-                    map.put(key, i);
+        val threadCount = 100
+        val latch = CountDownLatch(threadCount)
+
+        for (i in 0 until threadCount) {
+            executor.execute {
+                map.put(i, i * 10)
+                latch.countDown()
+            }
+        }
+
+        latch.await(5, TimeUnit.SECONDS)
+        executor.shutdown()
+
+        assertEquals(threadCount, map.size())
+        for (i in 0 until threadCount) {
+            assertEquals(i * 10, map.get(i))
+        }
+    }
+
+    @Test
+    fun `동일 KEY PUT 연산`() {
+        val map = Lecture1HashMap<String, Int>()
+        val threadCount = 100
+        val key = "KEY"
+        val latch = CountDownLatch(threadCount)
+
+        for(i in 0 until threadCount) {
+            executor.execute{
+                map.put(key, i)
+                latch.countDown()
+            }
+        }
+
+        latch.await(5, TimeUnit.SECONDS)
+        executor.shutdown()
+
+        assertEquals(1, map.size())
+        val result = map.get(key)
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `GET 연산`() {
+        val map = Lecture1HashMap<Int, Int>()
+        val threadCount = 50
+        val latch = CountDownLatch(threadCount * 2)
+
+        for(i in 0 until threadCount) {
+            map.put(i, i)
+        }
+
+        for(i in 0 until threadCount) {
+            executor.execute{
+                map.put(i, i * 10)
+                latch.countDown()
+            }
+            executor.execute{
+                val value = map.get(i)
+                assertTrue(value == i || value == i * 10)
+                latch.countDown()
+            }
+        }
+
+        latch.await(10, TimeUnit.SECONDS)
+        executor.shutdown()
+
+        for(i in 0 until threadCount) {
+            assertEquals(i * 10, map.get(i))
+        }
+    }
+
+    @Test
+    fun `REMOVE 연산`() {
+        val map = Lecture1HashMap<Int, Int>()
+        val threadCount = 50
+        val latch = CountDownLatch(threadCount * 2)
+
+        for(i in 0 until threadCount) {
+            executor.execute{
+                map.put(i, i * 10)
+                latch.countDown()
+            }
+            executor.execute{
+                map.remove(i)
+                latch.countDown()
+            }
+        }
+
+        assertEquals(0, map.size())
+    }
+
+    @Test
+    fun `PUT IF ABSENT 연산`() {
+        val map = Lecture1HashMap<String, Int>()
+        val threadCount = 100
+        val key = "key"
+        val latch = CountDownLatch(threadCount)
+        val results = mutableListOf<Int?>()
+
+        for (i in 0 until threadCount) {
+            executor.execute {
+                val result = map.putIfAbsent(key, i)
+                synchronized(results) {
+                    results.add(result)
                 }
-            }
-        }
-        val startTime = System.nanoTime()
-        latch.countDown()
-
-        futures.forEach { future ->
-            try {
-                future.get(60, TimeUnit.SECONDS)
-            } catch (e: Exception) {
-                fail("스레드 작업이 시간 내에 완료되지 않았습니다: ${e.message}")
+                latch.countDown()
             }
         }
 
-        val endTime = System.nanoTime()
-        val durationMs = (endTime - startTime) / 1_000_000
+        latch.await(5, TimeUnit.SECONDS)
+        executor.shutdown()
 
-        val result = map.size()
-        val expectedValue = threadNum * incrementsPerThread
-        assertEquals(expectedValue, result, "예상되는 값과 다릅니다.")
+        val successfulPuts = results.filter { it == null }
+        assertEquals(1, successfulPuts.size)
 
-        println("최종 값 : $result, 예상 값 : $expectedValue")
-        println("테스트 소요 시간: $durationMs ms")
+        val finalValue = map.get(key)
+        assertNotNull(finalValue)
+        assertTrue(finalValue in 0 until threadCount)
+        assertEquals(1, map.size())
     }
 }

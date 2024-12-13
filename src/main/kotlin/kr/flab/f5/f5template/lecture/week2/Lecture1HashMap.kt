@@ -2,75 +2,90 @@ package kr.flab.f5.f5template.lecture.week2
 
 import java.util.concurrent.atomic.AtomicReference
 
-data class Node<K, V>(
+data class Element<K, V>(
     val key: K,
-    @Volatile var value: V,
-    val next: AtomicReference<Node<K, V>?>)
+    var value: V,
+)
 
 class Lecture1HashMap<K, V> : java.util.Map<K, V> {
     private val innerMap = HashMap<K, V>()
-    private val head = AtomicReference<Node<K, V>?>(null)
+    private val mapRef: AtomicReference<Map<Int, AtomicReference<Element<K, V>>>> = AtomicReference(emptyMap())
 
     override fun get(key: Any?): V? {
-        if (key == null) return null
-        var current = head.get()
-        while (current != null) {
-            if (current.key == key) {
-                return current.value
-            }
-            current = current.next.get()
-        }
-        return null
+        val hash = key.hashCode()
+        val currentRef = mapRef.get()
+        val readNode = currentRef[hash] ?: return null
+        return readNode.get().value
     }
 
     override fun put(key: K, value: V): V? {
+        val hash = key.hashCode()
         while (true) {
-            var prev: Node<K, V>? = null
-            var current = head.get()
+            val currentMap = mapRef.get()
+            val elementRef = currentMap[hash]
+            val oldValue = elementRef?.get()?.value
 
-            while (current != null) {
-                if (current.key == key) {
-                    val oldValue = current.value
-                    current.value = value
-                    return oldValue
-                }
-                prev = current
-                current = current.next.get()
+            val newElement = Element(key, value)
+            val newMap = currentMap.toMutableMap().apply {
+                this[hash] = AtomicReference(newElement)
             }
 
-            val newNode = Node(key, value, AtomicReference(null))
-            if (prev == null) {
-                if (head.compareAndSet(null, newNode)) {
-                    return null
-                }
-            } else {
-                if (prev.next.compareAndSet(null, newNode)) {
-                    return null
-                }
+            if (mapRef.compareAndSet(currentMap, newMap)) {
+                return oldValue
             }
         }
     }
 
     override fun remove(key: Any?): V? {
-        return innerMap.remove(key)
+        val hash = key.hashCode()
+        while (true) {
+            val currentMap = mapRef.get()
+            val elementRef = currentMap[hash] ?: return null
+            val currentElement = elementRef.get()
+
+            if (currentElement.key != key) {
+                return null // 해시 충돌로 다른 키가 저장된 경우
+            }
+
+            val newMap = currentMap.toMutableMap().apply {
+                remove(hash)
+            }
+
+            if (mapRef.compareAndSet(currentMap, newMap)) {
+                return currentElement.value
+            }
+        }
     }
 
     override fun putIfAbsent(key: K, value: V): V? {
-        return innerMap.putIfAbsent(key, value)
+        val hash = key.hashCode()
+        while (true) {
+            val currentMap = mapRef.get()
+            val elementRef = currentMap[hash]
+
+            if (elementRef != null && elementRef.get().key == key) {
+                return elementRef.get().value // 이미 존재하는 경우
+            }
+
+            val newElement = Element(key, value)
+            val newMap = currentMap.toMutableMap().apply {
+                if (elementRef == null) {
+                    this[hash] = AtomicReference(newElement)
+                }
+            }
+
+            if (mapRef.compareAndSet(currentMap, newMap)) {
+                return null
+            }
+        }
     }
 
     override fun size(): Int {
-        var count = 0
-        var current = head.get()
-        while (current != null) {
-            count++
-            current = current.next.get()
-        }
-        return count
+        return mapRef.get().size
     }
 
     override fun isEmpty(): Boolean {
-        return head.get() == null
+        return mapRef.get().isEmpty()
     }
 
     // ------- 이 아래는 구현하지 않으셔도 됩니다 ----------
