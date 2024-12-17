@@ -2,30 +2,65 @@ package kr.flab.f5.f5template.lecture.week2
 
 class Lecture1HashMap<K, V> : java.util.Map<K, V> {
 
-    private val innerMap = HashMap<K, V>()
+    private val lockNumber = 100
+    private val locks = Array(lockNumber) { Any() }
+    private var innerMap = HashMap<K, V>()
+
+    private fun getLock(key: Any?): Any {
+        val index = key.hashCode() % lockNumber
+        return locks[index]
+    }
 
     override fun get(key: Any?): V? {
-        return innerMap[key]
+        val lock = getLock(key)
+        synchronized(lock) {
+            return innerMap[key]
+        }
     }
 
     override fun put(key: K, value: V): V? {
-        return innerMap.put(key, value)
+        val lock = getLock(key)
+        synchronized(lock) {
+            return innerMap.put(key, value)
+        }
     }
 
     override fun remove(key: Any?): V? {
-        return innerMap.remove(key)
+        val lock = getLock(key)
+        synchronized(lock) {
+            return innerMap.remove(key)
+        }
     }
 
     override fun putIfAbsent(key: K, value: V): V? {
-        return innerMap.putIfAbsent(key, value)
+        val lock = getLock(key)
+        synchronized(lock) {
+            return innerMap.putIfAbsent(key, value)
+        }
     }
 
+
     override fun size(): Int {
-        return innerMap.size
+        var size = 0
+        innerMap.keys.forEach { key ->
+            val lock = getLock(key)
+            synchronized(lock) {
+                size++
+            }
+        }
+        return size
     }
 
     override fun isEmpty(): Boolean {
-        return innerMap.isEmpty()
+        innerMap.keys.forEach { key ->
+            val lock = getLock(key)
+            synchronized(lock) {
+                if (innerMap[key] != null) {
+                    return false
+                }
+            }
+        }
+        return true
     }
 
     // ------- 이 아래는 구현하지 않으셔도 됩니다 ----------
