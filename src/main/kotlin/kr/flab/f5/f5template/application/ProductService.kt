@@ -1,7 +1,15 @@
 package kr.flab.f5.f5template.application
 
+import kr.flab.f5.f5template.application.dto.ProductCreateRequest
+import kr.flab.f5.f5template.application.dto.ProductDto
+import kr.flab.f5.f5template.application.dto.ProductUpdateRequest
+import kr.flab.f5.f5template.error.BaseException
+import kr.flab.f5.f5template.error.ErrorCode.PRODUCT_ALREADY_EXISTS
+import kr.flab.f5.f5template.error.ErrorCode.PRODUCT_NOT_FOUND
+import kr.flab.f5.f5template.mysql.jpa.entity.Product
 import kr.flab.f5.f5template.mysql.jpa.repository.ProductRepository
 import org.springframework.stereotype.Service
+import javax.transaction.Transactional
 
 @Service
 class ProductService(
@@ -23,5 +31,43 @@ class ProductService(
             throw IllegalArgumentException("No stock for product $id")
         }
         stock[id] = currentStock - 1
+    }
+
+    fun createStock(productCreateRequest: ProductCreateRequest) {
+
+        if (productRepository.existsProductByName(productCreateRequest.name)) {
+            throw BaseException(PRODUCT_ALREADY_EXISTS)
+        }
+
+        val product = Product(
+            name = productCreateRequest.name,
+            price = productCreateRequest.price,
+            stock = productCreateRequest.stock,
+        )
+
+        productRepository.save(product)
+    }
+
+    fun findAllProducts(): List<ProductDto> {
+        val products = productRepository.findAll()
+        return products.map { product ->
+            ProductDto(
+                id = product.id,
+                name = product.name,
+                price = product.price,
+                stock = product.stock
+            )
+        }
+    }
+
+    @Transactional
+    fun updateProduct(productId: Long, updateRequest: ProductUpdateRequest) {
+        val product = productRepository.findById(productId).orElseThrow { BaseException(PRODUCT_NOT_FOUND) }
+        product.updateProduct(updateRequest.name, updateRequest.price, updateRequest.stock)
+    }
+
+    fun deleteProduct(productId: Long) {
+        val product = productRepository.findById(productId).orElseThrow { BaseException(PRODUCT_NOT_FOUND) }
+        productRepository.delete(product)
     }
 }
