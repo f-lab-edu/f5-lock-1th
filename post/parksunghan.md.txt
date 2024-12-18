@@ -1,0 +1,5 @@
+생각보다 GCP 설정하는데 시간을 너무 많이 소요했습니다.
+
+pinpoint 와 성능 이슈 문제로 죽기도하고 해당 경험도 작성 예정입니다.
+
+https://velog.io/@park_libra1011/Garbage-Collection
