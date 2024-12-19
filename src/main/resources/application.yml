@@ -4,9 +4,9 @@ spring:
   profiles:
     active: local
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/f5_lock?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Seoul&rewriteBatchedStatements=true
-    username: root
-    password: dbpassword
+    url: jdbc:mysql://192.168.0.7:3306/f5_lock?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Seoul&rewriteBatchedStatements=true
+    username: f5_user
+    password: admin1004!
   jpa:
     show-sql: true
     database-platform: org.hibernate.dialect.MySQL8Dialect
