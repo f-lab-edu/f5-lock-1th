@@ -1,20 +1,24 @@
 package kr.flab.f5.f5template.lecture.week2
 
+import java.util.concurrent.atomic.AtomicInteger
+
 /*
-* size() 호출 시점의 map size를 구하는 방식
+* map의 현재 size를 구하는 방식
 *
-* 모든 데이터를 읽을 때 사용할 락 allReadLock을 추가하였습니다.
-* size() 에서는 allReadLock를 이용하여 map의 사이즈를 구했습니다.
+* size를 별도로 관리할 변수를 AtomicInteger 타입으로 등록했습니다.
+* put(), remove()할 때마다 증감하도록 구현하였고
+* 동일한 키를 여러번 put, remove할 때를 대비하여 중간에 key에 대한 체크 로직도 추가됐습니다
+* ex) if (!containsKey(key)) size.incrementAndGet()
 *
-* put(), remove()에서는 이중 synchronized 블럭을 사용하여
-* allReadLock가 점유 중일 때, 즉 size를 구하는 동안은 데이터를 put, remove 하지 못하게 막았습니다.
-* */
+* size()에서는 size 변수를 리턴하도록 구현했습니다.
+*/
+
 class AfterLectureHashMap<K, V> : java.util.Map<K, V> {
 
     private val lockNumber = 17
     private val locks = Array(lockNumber) { Any() }
-    private val allReadLock = Any()
     private var innerMap = HashMap<K, V>()
+    private var size = AtomicInteger(0)
 
     private fun getLock(key: Any?): Any {
         val index = key.hashCode() % lockNumber
@@ -31,34 +35,29 @@ class AfterLectureHashMap<K, V> : java.util.Map<K, V> {
     override fun put(key: K, value: V): V? {
         val lock = getLock(key)
         synchronized(lock) {
-            synchronized(allReadLock) {
-                return innerMap.put(key, value)
-            }
+            if (!containsKey(key)) size.incrementAndGet()
+            return innerMap.put(key, value)
         }
     }
 
     override fun remove(key: Any?): V? {
         val lock = getLock(key)
         synchronized(lock) {
-            synchronized(allReadLock) {
-                return innerMap.remove(key)
-            }
+            if (containsKey(key)) size.decrementAndGet()
+            return innerMap.remove(key)
         }
     }
 
     override fun putIfAbsent(key: K, value: V): V? {
         val lock = getLock(key)
         synchronized(lock) {
-            synchronized(allReadLock) {
-                return innerMap.putIfAbsent(key, value)
-            }
+            if (!containsKey(key)) size.incrementAndGet()
+            return innerMap.putIfAbsent(key, value)
         }
     }
 
     override fun size(): Int {
-        synchronized(allReadLock) {
-            return innerMap.size
-        }
+        return size.get()
     }
 
     override fun isEmpty(): Boolean {
@@ -68,7 +67,7 @@ class AfterLectureHashMap<K, V> : java.util.Map<K, V> {
     // ------- 이 아래는 구현하지 않으셔도 됩니다 ----------
 
     override fun containsKey(key: Any?): Boolean {
-        return innerMap.containsKey(key)
+        return get(key) != null
     }
 
     override fun containsValue(value: Any?): Boolean {
