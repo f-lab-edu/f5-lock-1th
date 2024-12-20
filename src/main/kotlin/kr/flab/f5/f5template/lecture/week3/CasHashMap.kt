@@ -3,6 +3,11 @@ package kr.flab.f5.f5template.lecture.week3
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.math.absoluteValue
 
+/**
+ * 동시성을 보장시키기위해 CAS 연산과 synchronized를 함께 사용하도록 구현했다.
+ * 락을 이용해 값을 넣거나 삭제할 때 size의 값도 동시에 변경될 수 있도록 했다.
+ * 따라서 size를 구할 때 각 분산된 hashmap의 크기를 각각 더해줘서 동시성이 보장되면서 크기를 구할 수 있도록 했다.
+ */
 class CasHashMap<K, V> : java.util.Map<K, V> {
 
     private val lockNumber = 16
