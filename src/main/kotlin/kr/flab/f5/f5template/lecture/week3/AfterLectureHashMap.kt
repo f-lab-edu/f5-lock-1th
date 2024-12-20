@@ -1,9 +1,19 @@
 package kr.flab.f5.f5template.lecture.week2
 
+/*
+* size() 호출 시점의 map size를 구하는 방식
+*
+* 모든 데이터를 읽을 때 사용할 락 allReadLock을 추가하였습니다.
+* size() 에서는 allReadLock를 이용하여 map의 사이즈를 구했습니다.
+*
+* put(), remove()에서는 이중 synchronized 블럭을 사용하여
+* allReadLock가 점유 중일 때, 즉 size를 구하는 동안은 데이터를 put, remove 하지 못하게 막았습니다.
+* */
 class AfterLectureHashMap<K, V> : java.util.Map<K, V> {
 
     private val lockNumber = 17
     private val locks = Array(lockNumber) { Any() }
+    private val allReadLock = Any()
     private var innerMap = HashMap<K, V>()
 
     private fun getLock(key: Any?): Any {
@@ -21,46 +31,38 @@ class AfterLectureHashMap<K, V> : java.util.Map<K, V> {
     override fun put(key: K, value: V): V? {
         val lock = getLock(key)
         synchronized(lock) {
-            return innerMap.put(key, value)
+            synchronized(allReadLock) {
+                return innerMap.put(key, value)
+            }
         }
     }
 
     override fun remove(key: Any?): V? {
         val lock = getLock(key)
         synchronized(lock) {
-            return innerMap.remove(key)
+            synchronized(allReadLock) {
+                return innerMap.remove(key)
+            }
         }
     }
 
     override fun putIfAbsent(key: K, value: V): V? {
         val lock = getLock(key)
         synchronized(lock) {
-            return innerMap.putIfAbsent(key, value)
+            synchronized(allReadLock) {
+                return innerMap.putIfAbsent(key, value)
+            }
         }
     }
 
-
     override fun size(): Int {
-        var size = 0
-        innerMap.keys.forEach { key ->
-            val lock = getLock(key)
-            synchronized(lock) {
-                size++
-            }
+        synchronized(allReadLock) {
+            return innerMap.size
         }
-        return size
     }
 
     override fun isEmpty(): Boolean {
-        innerMap.keys.forEach { key ->
-            val lock = getLock(key)
-            synchronized(lock) {
-                if (innerMap[key] != null) {
-                    return false
-                }
-            }
-        }
-        return true
+        return size() == 0
     }
 
     // ------- 이 아래는 구현하지 않으셔도 됩니다 ----------
