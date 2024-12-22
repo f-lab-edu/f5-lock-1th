@@ -20,6 +20,7 @@ class LectureSpinLockTest {
         repeat(testCase) {
             executors.execute {
                 try {
+                    // 동시에 락 진입을 위해서 0.5초 지나간 후 진입하도록 sleep 사용
                     Thread.sleep(500)
                     spinLock.lock {
                         println("Working start Thread ${Thread.currentThread()}")
