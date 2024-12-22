@@ -7,6 +7,7 @@ class LectureSpinLock {
 
     fun lock(callBack: () -> Unit) {
         var checkCallBackException = false
+        println("lock acquire try ${Thread.currentThread()}")
 
         try {
             while(!lock.tryLock()) { }

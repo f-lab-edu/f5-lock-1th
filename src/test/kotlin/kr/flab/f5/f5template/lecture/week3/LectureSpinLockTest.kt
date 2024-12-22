@@ -12,7 +12,7 @@ class LectureSpinLockTest {
 
     @Test
     fun lectureSpinLockRaceConditionTest() {
-        val testCase = 20
+        val testCase = 40
         val spinLock = LectureSpinLock()
         var count = 0
         val latch = CountDownLatch(testCase)
@@ -35,7 +35,7 @@ class LectureSpinLockTest {
         }
 
         latch.await()
-        assertThat(count).isEqualTo(20)
+        assertThat(count).isEqualTo(testCase)
     }
 
     @Test
@@ -114,6 +114,27 @@ class LectureSpinLockTest {
                     }
 
                 }
+            }
+        }
+
+        latch.await()
+    }
+
+    @Test
+    fun lectureDetailSpinLockExceptionTest() {
+        val testCase = 40
+        val spinLock = LectureDetailSpinLock()
+        val latch = CountDownLatch(testCase)
+
+        repeat(testCase) {
+            executors.execute {
+                Thread.sleep(500)
+                spinLock.spinLock {
+                    println("Working start Thread ${Thread.currentThread()}")
+                    Thread.sleep(500)
+                    println("Working end Thread ${Thread.currentThread()}")
+                }
+                latch.countDown()
             }
         }
 
