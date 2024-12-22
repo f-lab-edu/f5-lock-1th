@@ -56,4 +56,10 @@ class Product(
         }
         stock -= amount
     }
+
+    fun updateProduct(name: String, price: Long, stock: Long) {
+        this.name = name
+        this.price = price
+        this.stock = stock
+    }
 }
