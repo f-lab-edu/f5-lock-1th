@@ -1,7 +1,9 @@
 package kr.flab.f5.f5template.application
 
+import kr.flab.f5.f5template.mysql.jpa.entity.Product
 import kr.flab.f5.f5template.mysql.jpa.repository.ProductRepository
 import org.springframework.stereotype.Service
+import javax.transaction.Transactional
 
 @Service
 class ProductService(
@@ -17,11 +19,15 @@ class ProductService(
         stock[3] = 1000000
     }
 
+    @Transactional
     fun decreaseStock(id: Long) {
-        val currentStock = stock[id] ?: throw IllegalArgumentException("No stock for product $id")
-        if (currentStock <= 0) {
-            throw IllegalArgumentException("No stock for product $id")
-        }
-        stock[id] = currentStock - 1
+        val product = productRepository.findByIdWithOutLock(id)
+            ?: throw IllegalArgumentException("Product not found for id $id")
+        product.decreaseStock()
+    }
+
+    fun findById(id: Long): Product? {
+        return productRepository.findById(id)
+            .orElseThrow { RuntimeException("해당 상품을 찾을 수 없습니다. id=$id") }
     }
 }

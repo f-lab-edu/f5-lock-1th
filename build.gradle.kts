@@ -39,6 +39,8 @@ dependencies {
     implementation("org.apache.httpcomponents:httpcore:4.4.15")
     implementation("org.apache.httpcomponents:httpclient:4.5.13")
 
+    implementation("io.netty:netty-resolver-dns-native-macos:4.1.68.Final:osx-aarch_64")
+
     implementation("com.google.guava:guava:31.1-jre")
 
     runtimeOnly("mysql:mysql-connector-java:8.0.25")
