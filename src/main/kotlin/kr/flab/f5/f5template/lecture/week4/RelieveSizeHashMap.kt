@@ -2,15 +2,18 @@ package kr.flab.f5.f5template.lecture.week4
 
 import java.util.concurrent.atomic.AtomicLong
 
-class Lecture4HashMap<K,V>: java.util.Map<K, V> {
+class RelieveSizeHashMap<K,V>: java.util.Map<K, V> {
 
-    private val lockNumber = 16
-    private val segmentHashMap = Array(lockNumber) { hashMapOf<K, V>() }
-    private val locks = Array(lockNumber) { Any() }
-    private val counterCell = Array(lockNumber) { CounterCell(0) }
+    private val bucketCount = 16
+    private val buckets = Array(bucketCount) { Bucket<K,V>() }
     private val innerMap = HashMap<K,V>()
 
-    private class CounterCell(initialValue: Long) {
+    inner class Bucket<K, V> {
+        val bucketMap = HashMap<K,V>()
+        val counterCell = CounterCell(0)
+    }
+
+    inner class CounterCell(initialValue: Long) {
         private val value = AtomicLong(initialValue)
 
         fun increment() {
@@ -27,27 +30,26 @@ class Lecture4HashMap<K,V>: java.util.Map<K, V> {
     }
 
     private fun getHashIndex(key: Any?): Int {
-        return (key.hashCode() % lockNumber)
+        return key.hashCode() % bucketCount
     }
 
     override fun get(key: Any?): V? {
         val hashIndex = getHashIndex(key)
-        val hashMap = segmentHashMap[hashIndex]
+        val bucket = buckets[hashIndex]
 
-        synchronized(locks[hashIndex]) {
-            return hashMap[key]
+        synchronized(bucket) {
+            return bucket.bucketMap[key]
         }
     }
 
     override fun put(key: K, value: V): V? {
         val hashIndex = getHashIndex(key)
-        val hashMap = segmentHashMap[hashIndex]
-        val counter = counterCell[hashIndex]
+        val bucket = buckets[hashIndex]
 
-        synchronized(locks[hashIndex]) {
-            val oldValue = hashMap.put(key, value)
+        synchronized(bucket) {
+            val oldValue = bucket.bucketMap.put(key, value)
             if (oldValue == null) {
-                counter.increment()
+                bucket.counterCell.increment()
             }
             return oldValue
         }
@@ -55,13 +57,12 @@ class Lecture4HashMap<K,V>: java.util.Map<K, V> {
 
     override fun remove(key: Any?): V? {
         val hashIndex = getHashIndex(key)
-        val hashMap = segmentHashMap[hashIndex]
-        val counter = counterCell[hashIndex]
+        val bucket = buckets[hashIndex]
 
-        synchronized(locks[hashIndex]) {
-            val removedValue = hashMap.remove(key)
+        synchronized(bucket) {
+            val removedValue = bucket.bucketMap.remove(key)
             if (removedValue != null) {
-                counter.decrement()
+                bucket.counterCell.decrement()
             }
             return removedValue
         }
@@ -69,25 +70,39 @@ class Lecture4HashMap<K,V>: java.util.Map<K, V> {
 
     override fun putIfAbsent(key: K, value: V): V? {
         val hashIndex = getHashIndex(key)
-        val hashMap = segmentHashMap[hashIndex]
-        val counter = counterCell[hashIndex]
+        val bucket = buckets[hashIndex]
 
-        synchronized(locks[hashIndex]) {
-            val oldValue = hashMap.putIfAbsent(key, value)
+        synchronized(buckets[hashIndex]) {
+            val oldValue = bucket.bucketMap.putIfAbsent(key, value)
             if (oldValue == null) {
-                counter.increment()
+                bucket.counterCell.increment()
             }
             return oldValue
         }
     }
 
     override fun size(): Int {
-        val totalSize = counterCell.sumOf { it.get() }
+        var totalSize = 0L
+
+        buckets.forEach {
+            synchronized(it) {
+                totalSize += it.counterCell.get()
+            }
+        }
+
         return if (totalSize > Int.MAX_VALUE) Int.MAX_VALUE else totalSize.toInt()
     }
 
     override fun isEmpty(): Boolean {
-        return innerMap.isEmpty()
+        var totalSize = 0L
+
+        buckets.forEach {
+            synchronized(it) {
+                totalSize += it.counterCell.get()
+            }
+        }
+
+        return totalSize == 0L
     }
 
     // ------- 이 아래는 구현하지 않으셔도 됩니다 ----------
