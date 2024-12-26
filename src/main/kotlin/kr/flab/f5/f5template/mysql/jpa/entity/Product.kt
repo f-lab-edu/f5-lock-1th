@@ -19,9 +19,9 @@ class Product(
     id: Long = 0,
     name: String,
     price: Long,
-    stock: Long,
     createdAt: Instant = Instant.now(),
     updatedAt: Instant = Instant.now(),
+    stock: Long,
 ) {
 
     init {
@@ -43,9 +43,6 @@ class Product(
     var price: Long = price
         private set
 
-    @Column(name = "stock")
-    var stock: Long = stock
-        private set
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -57,19 +54,42 @@ class Product(
     var updatedAt: Instant = updatedAt
         private set
 
-    fun decreaseStock(amount: Long = 1) {
-        if (stock <= 0) {
-            throw IllegalArgumentException("No stock for product $id")
-        }
-        if (stock < amount) {
-            throw IllegalArgumentException("Not enough stock for product $id")
-        }
-        stock -= amount
-    }
+    @Column(name = "stock", nullable = false)
+    var stock: Long = stock
+        private set
 
-    fun reviseProduct(name: String, price: Long, stock: Long) {
+    fun reviseProduct(name: String, price: Long) {
         this.name = name
         this.price = price
-        this.stock = stock
+    }
+
+    fun increaseStock(amount: Long) {
+        if (amount <= 0) {
+            throw IllegalArgumentException("Increase amount must be positive.")
+        }
+        stock += amount
+    }
+
+    fun modifyStock(newQuantity: Long) : Long {
+        val stockDifference = newQuantity - stock
+        when {
+            stockDifference > 0 -> {
+                increaseStock(stockDifference)
+            }
+            stockDifference < 0 -> {
+                decreaseStock(stockDifference)
+            }
+        }
+        return stock
+    }
+
+    fun decreaseStock(substractStock: Long) {
+        if (substractStock <= 0) {
+            throw IllegalArgumentException("Decrease amount must be positive.")
+        }
+        if (stock < substractStock) {
+            throw IllegalArgumentException("Not enough stock to decrease.")
+        }
+        stock -= substractStock
     }
 }
