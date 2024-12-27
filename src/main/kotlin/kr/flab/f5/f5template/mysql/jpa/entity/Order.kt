@@ -5,18 +5,20 @@ import org.hibernate.annotations.UpdateTimestamp
 import java.time.Instant
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
 import javax.persistence.Table
 
-@Table(name = "product")
+@Table(name = "order")
 @Entity
-class Product(
+class Order(
     id: Long = 0,
-    name: String,
-    price: Long,
-    stock: Long,
+    productId: Long,
+    totalAmount: Long,
+    status: OrderStatus = OrderStatus.READY,
     createdAt: Instant = Instant.now(),
     updatedAt: Instant = Instant.now(),
 ) {
@@ -25,16 +27,17 @@ class Product(
     var id: Long = id
         private set
 
-    @Column(name = "name")
-    var name: String = name
+    @Column(name = "product_id")
+    var productId: Long = productId
         private set
 
-    @Column(name = "price")
-    var price: Long = price
+    @Column(name = "total_amount")
+    var totalAmount: Long = totalAmount
         private set
 
-    @Column(name = "stock")
-    var stock: Long = stock
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    var status: OrderStatus = status
         private set
 
     @CreationTimestamp
@@ -47,13 +50,10 @@ class Product(
     var updatedAt: Instant = updatedAt
         private set
 
-    fun decreaseStock(amount: Long = 1) {
-        if (stock <= 0) {
-            throw IllegalArgumentException("No stock for product $id")
+    fun complete() {
+        if (status != OrderStatus.READY) {
+            throw IllegalArgumentException("준비 상태인 주문만 완료 처리할 수 있습니다.")
         }
-        if (stock < amount) {
-            throw IllegalArgumentException("Not enough stock for product $id")
-        }
-        stock -= amount
+        status = OrderStatus.COMPLETED
     }
 }

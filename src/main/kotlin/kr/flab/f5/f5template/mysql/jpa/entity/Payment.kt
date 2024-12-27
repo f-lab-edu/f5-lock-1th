@@ -5,18 +5,20 @@ import org.hibernate.annotations.UpdateTimestamp
 import java.time.Instant
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
 import javax.persistence.Table
 
-@Table(name = "product")
+@Table(name = "payment")
 @Entity
-class Product(
+class Payment(
     id: Long = 0,
-    name: String,
-    price: Long,
-    stock: Long,
+    orderId: Long,
+    status: PaymentStatus = PaymentStatus.READY,
+    method: PaymentMethod,
     createdAt: Instant = Instant.now(),
     updatedAt: Instant = Instant.now(),
 ) {
@@ -25,16 +27,18 @@ class Product(
     var id: Long = id
         private set
 
-    @Column(name = "name")
-    var name: String = name
+    @Column(name = "order_id")
+    var orderId: Long = orderId
         private set
 
-    @Column(name = "price")
-    var price: Long = price
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    var status: PaymentStatus = status
         private set
 
-    @Column(name = "stock")
-    var stock: Long = stock
+    @Enumerated(EnumType.STRING)
+    @Column(name = "method")
+    var method: PaymentMethod = method
         private set
 
     @CreationTimestamp
@@ -47,13 +51,10 @@ class Product(
     var updatedAt: Instant = updatedAt
         private set
 
-    fun decreaseStock(amount: Long = 1) {
-        if (stock <= 0) {
-            throw IllegalArgumentException("No stock for product $id")
+    fun complete() {
+        if (status != PaymentStatus.READY) {
+            throw IllegalArgumentException("대기 상태인 결제만 완료 처리할 수 있습니다.")
         }
-        if (stock < amount) {
-            throw IllegalArgumentException("Not enough stock for product $id")
-        }
-        stock -= amount
+        status = PaymentStatus.COMPLETED
     }
 }
