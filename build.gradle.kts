@@ -2,7 +2,7 @@ plugins {
     kotlin("jvm") version "1.9.25"
     kotlin("plugin.spring") version "1.9.25"
     id("org.springframework.boot") version "2.5.5"
-    id("io.spring.dependency-management") version "1.1.6"
+    id("io.spring.dependency-management") version "1.0.15.RELEASE"
     kotlin("plugin.jpa") version "1.9.25"
     id("org.jlleitschuh.gradle.ktlint") version "10.2.0"
 }
@@ -12,7 +12,7 @@ version = "0.0.1-SNAPSHOT"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(11)
+        languageVersion.set(JavaLanguageVersion.of(11))
     }
 }
 
@@ -50,6 +50,9 @@ dependencies {
 kotlin {
     compilerOptions {
         freeCompilerArgs.addAll("-Xjsr305=strict")
+    }
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(11))
     }
 }
 
