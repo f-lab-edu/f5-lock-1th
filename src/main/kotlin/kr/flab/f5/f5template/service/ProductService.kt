@@ -21,6 +21,7 @@ class ProductService(
         val product = productRepository.findByIdWithLock(id)
         product?.let {
             try{
+                product.decreaseStock(quantity)
                 return StockResult(true,"재고 차감 성공")
             }
             catch (e : Exception) {
