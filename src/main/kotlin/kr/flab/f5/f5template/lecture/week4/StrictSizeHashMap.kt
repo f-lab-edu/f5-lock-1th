@@ -48,13 +48,11 @@ class StrictSizeHashMap<K,V>: java.util.Map<K, V> {
             val hashIndex = getHashIndex(key)
             val bucket = buckets[hashIndex]
 
-            synchronized(bucket) {
-                val oldValue = bucket.bucketMap.put(key, value)
-                if (oldValue == null) {
-                    bucket.counterCell.increment()
-                }
-                return oldValue
+            val oldValue = bucket.bucketMap.put(key, value)
+            if (oldValue == null) {
+                bucket.counterCell.increment()
             }
+            return oldValue
         }
     }
 
@@ -63,13 +61,11 @@ class StrictSizeHashMap<K,V>: java.util.Map<K, V> {
             val hashIndex = getHashIndex(key)
             val bucket = buckets[hashIndex]
 
-            synchronized(bucket) {
-                val removedValue = bucket.bucketMap.remove(key)
-                if (removedValue != null) {
-                    bucket.counterCell.decrement()
-                }
-                return removedValue
+            val removedValue = bucket.bucketMap.remove(key)
+            if (removedValue != null) {
+                bucket.counterCell.decrement()
             }
+            return removedValue
         }
     }
 
@@ -78,13 +74,11 @@ class StrictSizeHashMap<K,V>: java.util.Map<K, V> {
             val hashIndex = getHashIndex(key)
             val bucket = buckets[hashIndex]
 
-            synchronized(buckets[hashIndex]) {
-                val oldValue = bucket.bucketMap.putIfAbsent(key, value)
-                if (oldValue == null) {
-                    bucket.counterCell.increment()
-                }
-                return oldValue
+            val oldValue = bucket.bucketMap.putIfAbsent(key, value)
+            if (oldValue == null) {
+                bucket.counterCell.increment()
             }
+            return oldValue
         }
     }
 
