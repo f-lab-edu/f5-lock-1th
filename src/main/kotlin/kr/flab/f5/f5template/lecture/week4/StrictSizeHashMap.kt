@@ -87,9 +87,8 @@ class StrictSizeHashMap<K,V>: java.util.Map<K, V> {
 
         synchronized(sizeLock) {
             buckets.forEach {
-                synchronized(it) {
-                    totalSize += it.counterCell.get()
-                }
+
+                totalSize += it.counterCell.get()
             }
         }
 
@@ -101,9 +100,7 @@ class StrictSizeHashMap<K,V>: java.util.Map<K, V> {
 
         synchronized(sizeLock) {
             buckets.forEach {
-                synchronized(it) {
-                    totalSize += it.counterCell.get()
-                }
+                totalSize += it.counterCell.get()
             }
         }
 
