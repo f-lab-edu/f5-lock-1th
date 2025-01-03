@@ -2,7 +2,7 @@ plugins {
     kotlin("jvm") version "1.9.25"
     kotlin("plugin.spring") version "1.9.25"
     id("org.springframework.boot") version "2.5.5"
-    id("io.spring.dependency-management") version "1.1.6"
+    id("io.spring.dependency-management") version "1.0.15.RELEASE"
     kotlin("plugin.jpa") version "1.9.25"
     id("org.jlleitschuh.gradle.ktlint") version "10.2.0"
 }
@@ -12,7 +12,7 @@ version = "0.0.1-SNAPSHOT"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(11)
+        languageVersion.set(JavaLanguageVersion.of(8))
     }
 }
 
@@ -30,11 +30,13 @@ dependencies {
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm")
     implementation("io.github.microutils:kotlin-logging:3.0.5")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
 
     implementation("io.springfox:springfox-boot-starter:3.0.0")
     implementation("io.springfox:springfox-swagger-ui:3.0.0")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
 
     implementation("org.apache.httpcomponents:httpcore:4.4.15")
     implementation("org.apache.httpcomponents:httpclient:4.5.13")
@@ -50,6 +52,9 @@ dependencies {
 kotlin {
     compilerOptions {
         freeCompilerArgs.addAll("-Xjsr305=strict")
+    }
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(8))
     }
 }
 
