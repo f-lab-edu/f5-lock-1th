@@ -1,0 +1,5 @@
+### GET request to example server
+
+PATCH http://localhost:8080//products/3/stock
+
+###
