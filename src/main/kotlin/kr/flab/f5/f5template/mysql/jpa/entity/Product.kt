@@ -56,4 +56,10 @@ class Product(
         }
         stock -= amount
     }
+
+    fun updateProduct(product: Product) {
+        name = product.name
+        price = product.price
+        stock = product.stock
+    }
 }
