@@ -1,6 +1,8 @@
-package kr.flab.f5.f5template.mysql.jpa.entity
+package kr.flab.f5.f5template.lecture.week4
 
 import org.hibernate.annotations.CreationTimestamp
+import org.hibernate.annotations.OptimisticLockType
+import org.hibernate.annotations.OptimisticLocking
 import org.hibernate.annotations.UpdateTimestamp
 import java.time.Instant
 import javax.persistence.Column
@@ -9,14 +11,17 @@ import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
 import javax.persistence.Table
+import javax.persistence.Version
 
-@Table(name = "product")
+@OptimisticLocking(type = OptimisticLockType.VERSION)
 @Entity
-class Product(
+@Table(name="product")
+class ProductOptimisticLocking(
     id: Long = 0,
     name: String,
     price: Long,
     stock: Long,
+    version: Long = 0,
     createdAt: Instant = Instant.now(),
     updatedAt: Instant = Instant.now(),
 ) {
@@ -36,6 +41,9 @@ class Product(
     @Column(name = "stock")
     var stock: Long = stock
         private set
+
+    @Version
+    var version: Long = version
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -57,7 +65,7 @@ class Product(
         stock -= amount
     }
 
-    fun updateProduct(product: Product) {
+    fun updateProduct(product: ProductOptimisticLocking) {
         name = product.name
         price = product.price
         stock = product.stock
